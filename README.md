@@ -5,13 +5,13 @@ Setup assumed a Windows 10/11, with a working Ubuntu 20.04 on WSL2
 1. Get the `detectron2` repo on your device
 
 ```bash
-git clone https://github.com/facebookresearch/detectron2.git
+git clone https://github.com/gstanculeanu/designprojectm11.git
 ```
 
 1. Start a shell and enter 
 
 ```bash
-cd detectron2/docker
+cd designprojectm11/docker
 ```
 
 1. Copy the original `Dockerfile` 
