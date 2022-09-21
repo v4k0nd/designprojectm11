@@ -9,6 +9,7 @@ import time
 import warnings
 import cv2
 import tqdm
+import csv
 
 from detectron2.config import get_cfg
 from detectron2.data.detection_utils import read_image
@@ -100,7 +101,7 @@ if __name__ == "__main__":
     cfg = setup_cfg(args)
 
     demo = VisualizationDemo(cfg)
-
+    f = None
     if args.input:
         if len(args.input) == 1:
             args.input = glob.glob(os.path.expanduser(args.input[0]))
