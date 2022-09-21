@@ -110,6 +110,24 @@ if __name__ == "__main__":
             img = read_image(path, format="BGR")
             start_time = time.time()
             predictions, visualized_output = demo.run_on_image(img)
+            
+            row = []
+            # folder = path.split('/')[1]
+            mediaID = path.split('/')[-1].split('.')[0]
+
+            pred_class_list = predictions["instances"].pred_classes.tolist()
+            scores_list = predictions["instances"].scores.tolist()
+            human = 0
+            score = 0
+            human_id = 0
+            for i, e in enumerate(pred_class_list):
+                if e == 0:
+                    human = 1
+                    score = scores_list[i] 
+                    # print(score)
+                row.append([mediaID, human, human_id, score])
+                human_id += 1
+
             logger.info(
                 "{}: {} in {:.2f}s".format(
                     path,
@@ -124,6 +142,13 @@ if __name__ == "__main__":
                 if os.path.isdir(args.output):
                     assert os.path.isdir(args.output), args.output
                     out_filename = os.path.join(args.output, os.path.basename(path))
+                    if f is None:
+                        csv_dir = os.path.join(os.path.dirname(path), "data.csv")
+                        f = open(csv_dir, 'w', newline='')
+                        header = ['mediaID', 'human', 'id', 'score']
+                        writer = csv.writer(f)
+                        writer.writerow(header)
+                    writer.writerows(row)
                 else:
                     assert len(args.input) == 1, "Please specify a directory with args.output"
                     out_filename = args.output
