@@ -9,7 +9,7 @@ inference_test_output
 
 
 *.png
-*.json
+# *.json
 *.diff
 *.jpg
 !/projects/DensePose/doc/images/*.jpg
