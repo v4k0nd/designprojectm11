@@ -24,6 +24,9 @@ RUN pip install --user tensorboard cmake onnx   # cmake from apt-get is too old
 RUN pip install --user torch==1.10 torchvision==0.11.1 -f https://download.pytorch.org/whl/cu111/torch_stable.html
 
 RUN pip install --user 'git+https://github.com/facebookresearch/fvcore'
+
+# ridiculous fix (and only one I was able to find) to skip caching our repository
+ADD https://www.google.com /time.now
 # install detectron2
 RUN git clone https://github.com/v4k0nd/designprojectm11.git detectron2_repo
 # set FORCE_CUDA because during `docker build` cuda is not accessible
