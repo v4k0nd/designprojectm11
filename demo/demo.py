@@ -172,7 +172,7 @@ if __name__ == "__main__":
                     # write json below
                     
                     
-                        else:
+                else:
                     assert len(args.input) == 1, "Please specify a directory with args.output"
                     out_filename = args.output
                 visualized_output.save(out_filename)
