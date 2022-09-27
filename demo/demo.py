@@ -124,8 +124,9 @@ if __name__ == "__main__":
             for i, e in enumerate(pred_class_list):
                 if e == 0:
                     human = 1
-                    score = scores_list[i] 
+                    score = round(scores_list[i] , 2)
                     # print(score)
+                
                 row.append([mediaID, human, human_id, score])
                 human_id += 1
 
