@@ -10,6 +10,7 @@ import warnings
 import cv2
 import tqdm
 import csv
+import json
 
 from detectron2.config import get_cfg
 from detectron2.data.detection_utils import read_image
@@ -101,7 +102,9 @@ if __name__ == "__main__":
     cfg = setup_cfg(args)
 
     demo = VisualizationDemo(cfg)
-    f = None
+    f_csv = None
+    f_json = None
+    images_output = {}
     if args.input:
         if len(args.input) == 1:
             args.input = glob.glob(os.path.expanduser(args.input[0]))
@@ -109,26 +112,39 @@ if __name__ == "__main__":
         for path in tqdm.tqdm(args.input, disable=not args.output):
             # use PIL, to be consistent with evaluation
             img = read_image(path, format="BGR")
+            
+
+
+            values = [[], [], []]
+            values[1] = [img.shape[1], img.shape[0]]
+
+
             start_time = time.time()
             predictions, visualized_output = demo.run_on_image(img)
             
-            row = []
-            # folder = path.split('/')[1]
-            mediaID = path.split('/')[-1].split('.')[0]
+            row_csv = []
+            row_json = []
+            
+            file_name = path.split('/')[-1]
+            mediaID = file_name.split('.')[0]
+
 
             pred_class_list = predictions["instances"].pred_classes.tolist()
             scores_list = predictions["instances"].scores.tolist()
+            pred_boxes_list = predictions["instances"].pred_boxes.tolist()
             human = 0
             score = 0
-            human_id = 0
+            human_id = 0  
             for i, e in enumerate(pred_class_list):
                 if e == 0:
                     human = 1
                     score = round(scores_list[i] , 2)
-                    # print(score)
-                
-                row.append([mediaID, human, human_id, score])
+                    pred_box = pred_boxes_list[i]
+                    print(pred_box)
+                row_csv.append([mediaID, human, human_id, score])
                 human_id += 1
+
+                row_json.append([path, file_name, pred_boxes, score])
 
             logger.info(
                 "{}: {} in {:.2f}s".format(
@@ -144,14 +160,19 @@ if __name__ == "__main__":
                 if os.path.isdir(args.output):
                     assert os.path.isdir(args.output), args.output
                     out_filename = os.path.join(args.output, os.path.basename(path))
-                    if f is None:
+                    
+                    # write to csv
+                    if f_csv is None:
                         csv_dir = os.path.join(os.path.dirname(path), "data.csv")
-                        f = open(csv_dir, 'w', newline='')
+                        f_csv = open(csv_dir, 'w', newline='')
                         header = ['mediaID', 'human', 'id', 'score']
-                        writer = csv.writer(f)
+                        writer = csv.writer(f_csv)
                         writer.writerow(header)
-                    writer.writerows(row)
-                else:
+                    writer.writerows(row_csv)
+                    # write json below
+                    
+                    
+                        else:
                     assert len(args.input) == 1, "Please specify a directory with args.output"
                     out_filename = args.output
                 visualized_output.save(out_filename)
@@ -160,6 +181,28 @@ if __name__ == "__main__":
                 cv2.imshow(WINDOW_NAME, visualized_output.get_image()[:, :, ::-1])
                 if cv2.waitKey(0) == 27:
                     break  # esc to quit
+    
+    # write to json (API)
+    # if f_json is None:
+    #     json_dir = os.path.join(os.path.dirname(path), "data.json")
+    #     # f_json = open(json_dir, 'w', newline='')
+    #     # writer_ = csv.writer(f_csv)
+    # res = {
+    #     "generated_by": {
+    #         "datetime": datetime.datetime.now().isoformat(),
+    #         "version": -1,
+    #         "tag": -1
+    #     },
+    #     "media": list(image_output.keys()),
+    #     "region_groups": list_region_groups(),
+    #     "predictions": list_predictions(),
+    # }
+
+    # # print(json.dumps(res))
+    # with open(json_dir, 'w') as f:
+    #     json.dump(res, f)
+
+    
     elif args.webcam:
         assert args.input is None, "Cannot have both --input and --webcam!"
         assert args.output is None, "output not yet supported with --webcam!"
