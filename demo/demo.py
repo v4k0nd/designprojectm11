@@ -11,6 +11,7 @@ import cv2
 import tqdm
 import csv
 import json
+from datetime import datetime
 
 from detectron2.config import get_cfg
 from detectron2.data.detection_utils import read_image
@@ -105,6 +106,7 @@ if __name__ == "__main__":
     f_csv = None
     f_json = None
     images_output = {}
+    
     if args.input:
         if len(args.input) == 1:
             args.input = glob.glob(os.path.expanduser(args.input[0]))
@@ -131,20 +133,23 @@ if __name__ == "__main__":
 
             pred_class_list = predictions["instances"].pred_classes.tolist()
             scores_list = predictions["instances"].scores.tolist()
-            pred_boxes_list = predictions["instances"].pred_boxes.tolist()
+            # print(predictions["instances"].pred_boxes.tensor.tolist())
+            pred_boxes_list = predictions["instances"].pred_boxes.tensor.tolist()
             human = 0
             score = 0
             human_id = 0  
             for i, e in enumerate(pred_class_list):
                 if e == 0:
+                    print("found human")
                     human = 1
                     score = round(scores_list[i] , 2)
-                    pred_box = pred_boxes_list[i]
-                    print(pred_box)
+
+                    # contains x1, y1, x2, y2
+                    pred_boxes = pred_boxes_list[i]
+                    row_json.append([path, file_name, pred_boxes, score])
                 row_csv.append([mediaID, human, human_id, score])
                 human_id += 1
 
-                row_json.append([path, file_name, pred_boxes, score])
 
             logger.info(
                 "{}: {} in {:.2f}s".format(
@@ -182,27 +187,65 @@ if __name__ == "__main__":
                 if cv2.waitKey(0) == 27:
                     break  # esc to quit
     
-    # write to json (API)
-    # if f_json is None:
-    #     json_dir = os.path.join(os.path.dirname(path), "data.json")
-    #     # f_json = open(json_dir, 'w', newline='')
-    #     # writer_ = csv.writer(f_csv)
-    # res = {
-    #     "generated_by": {
-    #         "datetime": datetime.datetime.now().isoformat(),
-    #         "version": -1,
-    #         "tag": -1
-    #     },
-    #     "media": list(image_output.keys()),
-    #     "region_groups": list_region_groups(),
-    #     "predictions": list_predictions(),
-    # }
+        # write to json (API)
+        # if f_json is None:
+        json_dir = os.path.join(os.path.dirname(path), "data.json")
+        print(f"placing data.json in: {json_dir}")
+        # f_json = open(json_dir, 'w', newline='')
+        # writer_ = csv.writer(f_csv)
+        res = {
+            "generated_by": {
+                "datetime": datetime.now().isoformat(),
+                "version": -1,
+                "tag": -1
+            },
+            "media": [],
+            "region_groups": [],
+            "predictions": [],
+        }
 
-    # # print(json.dumps(res))
-    # with open(json_dir, 'w') as f:
-    #     json.dump(res, f)
+        media_list = []
+        region_groups_list = []
+        predictions_list = []
+        #  row_json.append([path, file_name, pred_boxes, score])
+        for row in row_json:
+            media_list.append({"id": row[0], "filename": row[1]})
+            region_groups_list.append({"id": "",
+                                    "individual_id": "",
+                                    "regions": [
+                                            {
+                                                "media_id": row[0], 
+                                                "box": {
+                                                    "x1": row[2][0],
+                                                    "y1": row[2][1],
+                                                    "x2": row[2][2],
+                                                    "y2": row[2][3],
+                                                }
+                                            }
+                                        ]
+                                    })
+            predictions_list.append(
+                {
+                    "region_group_id": row[0],
+                    "taxa": {
+                        "type": "Homo sapience",
+                        "items": [{
+                            "scientific_name": "Homo sapience",
+                            "probability": row[3],
+                            "scientific_name_id": ""
+                        }]
+                    }
+                
+                }
+            )
+        res["media"] = media_list
+        res["region_groups"] = region_groups_list
+        res["predictions"] = predictions_list
+        print(json.dumps(res))
+        with open(json_dir, 'w') as f:
+            json.dump(res, f)
 
-    
+
     elif args.webcam:
         assert args.input is None, "Cannot have both --input and --webcam!"
         assert args.output is None, "output not yet supported with --webcam!"
