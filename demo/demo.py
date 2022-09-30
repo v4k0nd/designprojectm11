@@ -105,8 +105,10 @@ if __name__ == "__main__":
     demo = VisualizationDemo(cfg)
     f_csv = None
     f_json = None
-    images_output = {}
     
+    images_output = {}
+    row_json = []
+
     if args.input:
         if len(args.input) == 1:
             args.input = glob.glob(os.path.expanduser(args.input[0]))
@@ -125,7 +127,7 @@ if __name__ == "__main__":
             predictions, visualized_output = demo.run_on_image(img)
             
             row_csv = []
-            row_json = []
+            
             
             file_name = path.split('/')[-1]
             mediaID = file_name.split('.')[0]
@@ -146,6 +148,7 @@ if __name__ == "__main__":
 
                     # contains x1, y1, x2, y2
                     pred_boxes = pred_boxes_list[i]
+                    print("appended to row_json")
                     row_json.append([path, file_name, pred_boxes, score])
                 row_csv.append([mediaID, human, human_id, score])
                 human_id += 1
@@ -165,10 +168,9 @@ if __name__ == "__main__":
                 if os.path.isdir(args.output):
                     assert os.path.isdir(args.output), args.output
                     out_filename = os.path.join(args.output, os.path.basename(path))
-                    
                     # write to csv
                     if f_csv is None:
-                        csv_dir = os.path.join(os.path.dirname(path), "data.csv")
+                        csv_dir = os.path.join(args.output, "data.csv")
                         f_csv = open(csv_dir, 'w', newline='')
                         header = ['mediaID', 'human', 'id', 'score']
                         writer = csv.writer(f_csv)
@@ -189,7 +191,7 @@ if __name__ == "__main__":
     
         # write to json (API)
         # if f_json is None:
-        json_dir = os.path.join(os.path.dirname(path), "data.json")
+        json_dir = os.path.join(args.output, "data.json")
         print(f"placing data.json in: {json_dir}")
         # f_json = open(json_dir, 'w', newline='')
         # writer_ = csv.writer(f_csv)
@@ -209,6 +211,7 @@ if __name__ == "__main__":
         predictions_list = []
         #  row_json.append([path, file_name, pred_boxes, score])
         for row in row_json:
+            print(f"row: {row}")
             media_list.append({"id": row[0], "filename": row[1]})
             region_groups_list.append({"id": "",
                                     "individual_id": "",
