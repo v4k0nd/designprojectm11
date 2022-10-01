@@ -14,7 +14,7 @@ FILE_NAME_GROUND_TRUTH = "merge_result.csv"
 COLUMNS_TO_USE = ["human","humanDetectron", "score", "mediaID"]
 
 
-def table_setup(conf_level):
+def table_setup():
     table = Table(title="", box=box.ROUNDED)
     table.add_column("")
     table.add_column("predicted 0")
