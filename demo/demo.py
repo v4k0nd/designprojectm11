@@ -119,10 +119,6 @@ if __name__ == "__main__":
             
 
 
-            values = [[], [], []]
-            values[1] = [img.shape[1], img.shape[0]]
-
-
             start_time = time.time()
             predictions, visualized_output = demo.run_on_image(img)
             
@@ -142,13 +138,11 @@ if __name__ == "__main__":
             human_id = 0  
             for i, e in enumerate(pred_class_list):
                 if e == 0:
-                    print("found human")
                     human = 1
                     score = round(scores_list[i] , 2)
 
                     # contains x1, y1, x2, y2
                     pred_boxes = pred_boxes_list[i]
-                    print("appended to row_json")
                     row_json.append([path, file_name, pred_boxes, score])
                 row_csv.append([mediaID, human, human_id, score])
                 human_id += 1
