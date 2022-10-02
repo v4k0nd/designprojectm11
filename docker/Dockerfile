@@ -48,7 +48,7 @@ WORKDIR /home/appuser/detectron2_repo
 
 COPY ./main.py /home/appuser/detectron2_repo/
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "9976"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "9976", "--reload"]
 # run detectron2 under user "appuser":
 # wget http://images.cocodataset.org/val2017/000000439715.jpg -O input.jpg
 # python3 demo/demo.py  \

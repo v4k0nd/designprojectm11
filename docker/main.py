@@ -17,6 +17,7 @@ async def create_files(
 async def create_upload_files(
     files: List[UploadFile] = File(description="Multiple files as UploadFile"),
 ):
+    files[0].file.write()
     return {"filenames": [file.filename for file in files]}
 
 
