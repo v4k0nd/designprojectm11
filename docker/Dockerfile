@@ -26,10 +26,11 @@ RUN pip install --user torch==1.10 torchvision==0.11.1 -f https://download.pytor
 RUN pip install --user 'git+https://github.com/facebookresearch/fvcore'
 
 # for serving json via webinterface
-RUN pip install --no-cache-dir --upgrade --user fastapi pydantic uvicorn orjson
+RUN pip install --upgrade --user fastapi pydantic uvicorn orjson
 
 # ridiculous fix (and only one I was able to find) to skip caching our repository
-ADD https://www.google.com /time.now
+# ADD https://www.google.com /time.now
+ 
 # install detectron2
 RUN git clone https://github.com/v4k0nd/designprojectm11.git detectron2_repo
 # set FORCE_CUDA because during `docker build` cuda is not accessible
@@ -45,7 +46,7 @@ RUN pip install --user -e detectron2_repo
 ENV FVCORE_CACHE="/tmp"
 WORKDIR /home/appuser/detectron2_repo
 
-COPY ../fastapi/main.py /home/appuser/detectron2_repo/
+COPY ./main.py /home/appuser/detectron2_repo/
 
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "9976"]
 # run detectron2 under user "appuser":
