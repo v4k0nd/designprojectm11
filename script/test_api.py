@@ -19,7 +19,7 @@ images = list(load("dataset-1-5").iterdir())
 files = []
 for image_path in images:
    files.append(("media", open(str(image_path), "rb")))
-
+files = []
 start_time = time.time()
 response = requests.post(URL, files=files)
 print(f"this took {round(time.time() - start_time, 4)} seconds")
