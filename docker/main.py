@@ -4,18 +4,19 @@ import tempfile
 from typing import List
 
 from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 
 from pathlib import Path
 import subprocess
 
 app = FastAPI()
 
-# @app.post("/v1/analyse/")
-# async def create_upload_files(
-#     media
-# ):
-#     return {}
+@app.get("/tmp/{file_path:path}")
+def get_image(
+    file_path: str
+):
+    return FileResponse(f"./outputs/tmp/{file_path}")
+
 
 @app.post("/v1/analyse/")
 async def create_upload_files(
