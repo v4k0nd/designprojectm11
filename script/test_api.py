@@ -14,15 +14,19 @@ def _load_handle(file_name: Path):
         return curr_path
     return  _load_handle(".." / curr_path)
 
-images = list(load("dataset-1-5").iterdir())
+def api_testing(dataset_path):
+    images = list(load(dataset_path).iterdir())
 
-files = []
-for image_path in images:
-   files.append(("media", open(str(image_path), "rb")))
+    files = []
+    for image_path in images:
+        files.append(("media", open(str(image_path), "rb")))
 
-start_time = time.time()
-response = requests.post(URL, files=files)
-print(f"this took {round(time.time() - start_time, 4)} seconds")
+    start_time = time.time()
+    response = requests.post(URL, files=files)
+    print(f"this took {round(time.time() - start_time, 4)} seconds")
 
-pprint(response)
-pprint(response.json())
+    response_json = response.json()
+
+    pprint(response)
+    pprint(response_json)
+    return response_json
