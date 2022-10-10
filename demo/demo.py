@@ -105,6 +105,15 @@ if __name__ == "__main__":
     demo = VisualizationDemo(cfg)
     f_csv = None
     f_json = None
+
+    # Normalizes coordinates to a 0-1 scale.
+    def normalize_coordinates(x1, y1, x2, y2, img):
+        h, w = img.shape[:2]
+        new_x1 = x1/(w - 1.)
+        new_y1 = y1/(h - 1.)
+        new_x2 = x2/(w - 1.)
+        new_y2 = y2/(h - 1.)
+        return [new_x1, new_y1, new_x2, new_y2]
     
     images_output = {}
     row_json = []
@@ -143,6 +152,7 @@ if __name__ == "__main__":
 
                     # contains x1, y1, x2, y2
                     pred_boxes = pred_boxes_list[i]
+                    pred_boxes = normalize_coordinates(*pred_boxes, img)
                     row_json.append([path, file_name, pred_boxes, score])
                 row_csv.append([mediaID, human, human_id, score])
                 human_id += 1
@@ -192,8 +202,8 @@ if __name__ == "__main__":
         res = {
             "generated_by": {
                 "datetime": datetime.now().isoformat(),
-                "version": -1,
-                "tag": -1
+                "version": "0.6",
+                "tag": "DT2HD"
             },
             "media": [],
             "region_groups": [],
@@ -208,7 +218,8 @@ if __name__ == "__main__":
             print(f"row: {row}")
             media_list.append({"id": row[0], "filename": row[1]})
             region_groups_list.append({"id": "",
-                                    "individual_id": "",
+                                    # After reading the docs im quite sure we can delete the individual_id 
+                                    # "individual_id": "",
                                     "regions": [
                                             {
                                                 "media_id": row[0], 
@@ -225,11 +236,11 @@ if __name__ == "__main__":
                 {
                     "region_group_id": row[0],
                     "taxa": {
-                        "type": "Homo sapience",
+                        "type": "Homo sapiens",
                         "items": [{
-                            "scientific_name": "Homo sapience",
+                            "scientific_name": "Homo sapiens",
                             "probability": row[3],
-                            "scientific_name_id": ""
+                            "scientific_name_id": "https://data.biodiversitydata.nl/naturalis/specimen/RGM.1332465"
                         }]
                     }
                 
