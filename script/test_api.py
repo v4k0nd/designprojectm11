@@ -7,14 +7,14 @@ URL = "http://localhost:9976/v1/analyse/"
 def load(file_name: str):
     return _load_handle(Path(file_name))
 
-def _load_handle(file_name: Path):
-    
+def _load_handle(file_name: Path):    
     curr_path = file_name
     if curr_path.exists():
         return curr_path
     return  _load_handle(".." / curr_path)
 
-def api_testing(dataset_path):
+def api_testing(dataset_path: str):
+    
     images = list(load(dataset_path).iterdir())
 
     files = []
@@ -30,3 +30,6 @@ def api_testing(dataset_path):
     pprint(response)
     pprint(response_json)
     return response_json
+
+if __name__ == "__main__":
+    api_testing("dataset-1-5/")
