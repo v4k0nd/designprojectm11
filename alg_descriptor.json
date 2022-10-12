@@ -1,0 +1,16 @@
+{
+	"short_name": "detectron2",
+	"description": "",
+	"docker": "https://raw.githubusercontent.com/v4k0nd/designprojectm11/main/docker/Dockerfile",
+	"input.batch_support": "True",
+	"input.batch_size_max": "9000",
+	"configuration": {
+		"container": {
+			"infer_path": "/v1/analyse/",
+			"infer_post_variable_name": "media",
+			"port": "9976",
+			"docker_runtime_parameters": "--gpus all -it -v /detectron2_detection/:/code/ --name=detectron2_container detectron2:v0",
+			"docker_env_parameters": ""
+		}
+	}
+}
