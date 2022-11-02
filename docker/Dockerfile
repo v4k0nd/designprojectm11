@@ -25,7 +25,7 @@ RUN pip install --user torch==1.10 torchvision==0.11.1 -f https://download.pytor
 RUN pip install --user 'git+https://github.com/facebookresearch/fvcore'
 
 # install dependencies to start a webserver
-RUN pip install --upgrade --user fastapi pydantic python-multipart uvicorn 
+RUN pip install --upgrade --user fastapi pydantic python-multipart uvicorn jinja2
 
 # ridiculous fix (and only one I was able to find) to skip caching our repository
 ADD https://www.google.com /time.now
@@ -48,5 +48,7 @@ WORKDIR /home/appuser/detectron2_repo
 
 # copy the main.py into docker, to be able to start later
 COPY ./main.py /home/appuser/detectron2_repo/
+COPY ./website_files/ /home/appuser/detectron2_repo/
+
 
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "9976", "--reload"]

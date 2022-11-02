@@ -3,14 +3,34 @@ import shutil
 import tempfile
 from typing import List
 
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Request
 from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+
+
+
+
 
 from pathlib import Path
 import subprocess
 
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
+
+templates = Jinja2Templates(directory="templates")
+
+
+# @app.get("/items/{id}", response_class=HTMLResponse)
+# async def read_item(request: Request, id: str):
+#     return templates.TemplateResponse("item.html", {"request": request, "id": id})
+
+
+@app.get("/cam", response_class=HTMLResponse)
+def get_camera(request: Request): 
+    return templates.TemplateResponse("cam.html", {"request": request})
+  
 @app.get("/tmp/{file_path:path}")
 def get_image(
     file_path: str
@@ -51,14 +71,6 @@ async def create_upload_files(
                 return json.load(f)
 
 
-@app.get("/")
-async def main():
-    content = """
-<body>
-<form action="/v1/analyse/" enctype="multipart/form-data" method="post">
-<input name="media" type="file" multiple>
-<input type="submit">
-</form>
-</body>
-    """
-    return HTMLResponse(content=content)
+@app.get("/", response_class=HTMLResponse)
+async def main(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
