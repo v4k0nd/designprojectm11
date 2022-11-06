@@ -12,6 +12,7 @@ def find_algorithm_names(df):
             if strsplit[1] not in algorithm_names:
                 algorithm_names.append(strsplit[1])
     return algorithm_names
+<<<<<<< Updated upstream
 
 # algorithm_names=find_algorithm_names(df)
 # print(algorithm_names)
@@ -20,6 +21,16 @@ def find_algorithm_names(df):
 # In[ ]:
 
 
+=======
+
+# algorithm_names=find_algorithm_names(df)
+# print(algorithm_names)
+
+
+# In[ ]:
+
+
+>>>>>>> Stashed changes
 from rich import print
 from rich.console import Console
 from rich.table import Table
@@ -119,6 +130,7 @@ def show_results(algorithm_name,columnlabel):
 # In[ ]:
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
 
 
@@ -138,10 +150,28 @@ def show_results(algorithm_name,columnlabel):
 
 
 
+=======
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[44]:
+
+
+
+
+>>>>>>> Stashed changes
     
 
 
 # In[ ]:
+<<<<<<< Updated upstream
 >>>>>>> Stashed changes
 
 # In[ ]:
@@ -163,6 +193,10 @@ def show_results(algorithm_name,columnlabel):
 
 
 =======
+>>>>>>> Stashed changes
+=======
+
+
 >>>>>>> Stashed changes
 import numpy as np
 from pathlib import Path
@@ -180,10 +214,13 @@ if uploaded_file is not None:
     for i in range(0, len(temp_test)):
         algorithm_results.append(show_results(temp_test[i],columns[i]))
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     result=st.button("View history of runs")
     if result:
     	st=st.empty()
     	st.write(algorithm_results[0])
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
     
