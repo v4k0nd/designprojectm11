@@ -67,9 +67,6 @@ def confusion_matrix_create (column_name,columnlabel):
     new_title=new_title1+new_title2
     columnlabel.markdown(new_title, unsafe_allow_html=True)
     print(dff)
-    print(str(tn))
-    print(str(tp))
-    return str(tn),str(tp)
 
     
 
@@ -90,7 +87,6 @@ def ROC_create (column_name,columnlabel):
     fig_roc=RocCurveDisplay.from_predictions(y, X)
 #     plt.show()
     columnlabel.pyplot(fig_roc.figure_)
-    return fig_roc
 
 
 # In[ ]:
@@ -106,23 +102,14 @@ def show_results(algorithm_name,columnlabel):
     columnlabel.markdown(new_title, unsafe_allow_html=True)
 #     st.write (algorithm_name+ " algorithm results")
     columnlabel.markdown(new_subtitle1+new_subtitle2, unsafe_allow_html=True)
-    fig_ROC=ROC_create("accuracy_"+algorithm_name,columnlabel)
+    ROC_create("accuracy_"+algorithm_name,columnlabel)
     columnlabel.markdown(new_subtitle1+new_subtitle3, unsafe_allow_html=True)
-    conf_matrix_results=confusion_matrix_create("labels_"+algorithm_name,columnlabel)
-    return_result=[]
-    return_result.append(algorithm_name)
-    return_result.append(conf_matrix_results[0])
-    return_result.append(conf_matrix_results[1])
+    confusion_matrix_create("labels_"+algorithm_name,columnlabel)
     
 
 
 # In[ ]:
 
-<<<<<<< Updated upstream
-
-
-
-=======
 
 
 
@@ -142,51 +129,21 @@ def show_results(algorithm_name,columnlabel):
 
 
 # In[ ]:
->>>>>>> Stashed changes
-
-# In[ ]:
 
 
-
-
-
-# In[44]:
-
-
-
-
-    
-
-<<<<<<< Updated upstream
-
-# In[ ]:
-
-
-=======
->>>>>>> Stashed changes
 import numpy as np
 from pathlib import Path
 import pandas as pd
 import streamlit as st
-
 uploaded_file = st.file_uploader("Choose a  CSV file",type=['csv'])
 
 if uploaded_file is not None:
 #read csv
     df=pd.read_csv(uploaded_file)
-    algorithm_results=[]
     temp_test=find_algorithm_names(df)
     columns= st.columns(len(temp_test),gap="medium")
     for i in range(0, len(temp_test)):
-        algorithm_results.append(show_results(temp_test[i],columns[i]))
-<<<<<<< Updated upstream
-    result=st.button("View history of runs")
-    if result:
-    	st=st.empty()
-    	st.write(algorithm_results[0])
-=======
->>>>>>> Stashed changes
-    
+        show_results(temp_test[i],columns[i])
 
 
 # In[ ]:
