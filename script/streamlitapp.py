@@ -102,22 +102,41 @@ def show_results(algorithm_name,columnlabel):
     columnlabel.markdown(new_subtitle1+new_subtitle3, unsafe_allow_html=True)
     confusion_matrix_create("labels_"+algorithm_name,columnlabel)
     
-
+def load_previous_results():
+    for result in retrieved_results:
+        fig_roc = RocCurveDisplay.from_predictions(y, X)
+        columnlabel.pyplot(fig_roc.figure_)
 
 import numpy as np
 from pathlib import Path
 import pandas as pd
 import streamlit as st
-uploaded_file = st.file_uploader("Choose a  CSV file",type=['csv'])
 
-if uploaded_file is not None:
-#read csv
-    df=pd.read_csv(uploaded_file)
-    temp_test=find_algorithm_names(df)
-    columns= st.columns(len(temp_test),gap="medium")
-    for i in range(0, len(temp_test)):
-        show_results(temp_test[i],columns[i])
+def calculate():
+    if (json_file is not None) and (zip_file is not None):
+    #read csv
+        df=pd.read_json(json_file)
+        temp_test=find_algorithm_names(df)
+        columns= st.columns(len(temp_test),gap="medium")
+        for i in range(0, len(temp_test)):
+            show_results(temp_test[i],columns[i])
 
+def get_dataset_names():
+    return []
+def load_results(dataset_name):
+    return
+
+
+st.title(body="AI evaluation framework")
+
+st.header(body="New run")
+zip_file = st.file_uploader(label="Choose a zip file containing a data set and a csv file containing the image labels.", type=['zip'])
+json_file = st.file_uploader(label="Choose a JSON file containing the output of your algorithm", type=['json'])
+st.button(label="Calculate statistics",help="A json file and a zip file must be uploaded first", on_click=calculate())
+
+st.header(body="See stored results from previous runs")
+dataset_name = st.selectbox(label="Select dataset", options=get_dataset_names())
+st.button(label='Load results', help='Loads results of other algorithms previously ran on the selected dataset', on_click=load_results(dataset_name))
 
 
 
