@@ -1,0 +1,111 @@
+<html>
+
+<head>
+    <title>Camera</title>
+    <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
+</head>
+
+<body>
+    <main class="grid-container">
+        <!-- <video id="player" controls autoplay></video> -->
+        <section class="grid-item">
+            <h2>Step 1: Video feed</h2>
+            <video id="player" autoplay muted playsinline ></video>
+            <button id="capture">Capture</button>
+        </section>
+
+        <section class="grid-item">
+            <h2>Step 2: Image from feed</h2>
+            <canvas id="canvas"></canvas>
+            <button class="transparent">View</button>  
+        </section>
+
+        <section class="grid-item">
+            <h2>Step 3: Analyzed image</h2>
+            <img id="img" src="https://production-media.paperswithcode.com/libraries/dete.png" alt="Loading">
+            <button id="view">View</button>
+        </section>
+    </main>
+    <aside>
+        <section>
+            <h3>Response</h3>
+            <pre id="response">response goes here</pre>
+        </section>
+
+    </aside>
+
+    <script>
+        const player = document.getElementById('player');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        const captureButton = document.getElementById('capture');
+        const viewButton = document.getElementById('view')
+        viewButton.disabled = true;
+        var imgTag = document.getElementById('img')
+        var responseParagraph = document.getElementById('response');
+        setSize(500)
+
+
+        const constraints = {
+            video: true,
+        };
+
+        captureButton.addEventListener('click', () => {
+            // Draw the video frame to the canvas.
+            viewButton.disabled = true;
+
+
+            context.drawImage(player, 0, 0, canvas.width, canvas.height);
+
+            myFile = canvas.toBlob(
+                (blob) => {
+                    const myFile = new File([blob], 'image.png', {
+                        type: blob.type,
+                    });
+                    // console.log(blob);
+                    const formData = new FormData();
+
+                    formData.append("media", myFile);
+
+
+                    const req = new XMLHttpRequest();
+                    req.open("POST", "/v1/analyse/");
+
+                    req.send(formData);
+
+                    req.onload = function () {
+                        viewButton.disabled = false;
+                        imgTag.classList.remove("hidden")
+
+                        var json_data = JSON.parse(req.response);
+                        console.log(json_data);
+                        console.log(typeof json_data)
+                        console.log(json_data.media)
+                        viewButton.addEventListener('click', () => {
+                            window.open(json_data.media[0].id, '_blank');
+                        })
+                        imgTag.setAttribute("src", json_data.media[0].id)
+                        responseParagraph.textContent = JSON.stringify(json_data, null, 2);
+                    };
+                }, 'image/png', 1);
+
+        });
+
+        // Attach the video stream to the video element and autoplay.
+        navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+            player.srcObject = stream;
+        });
+
+    function setSize(width) {
+        const height = width * 318/424
+        canvas.width = width;
+        canvas.height = height;
+        player.width = width;
+        player.height = height;
+        imgTag.width = width;
+        imgTag.height = height;
+    }
+    </script>
+</body>
+
+</html>

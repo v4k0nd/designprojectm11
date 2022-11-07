@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main</title>
+    <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
+</head>
+
+<body>
+    <!-- <div id="loading">
+        <img id="loading-fg-gif" src="https://media.tenor.com/UnFx-k_lSckAAAAC/amalie-steiness.gif">
+        <img id="loading-bg-img" src="https://production-media.paperswithcode.com/libraries/dete.png">
+    </div> -->
+
+
+    <div class="indent">
+        <h1>Detectron2 analysis lab</h1>
+
+
+
+        <p>from where would you like to me to get the image from?</p>
+
+        <h3>From device files</h3>
+        <form action="/v1/analyse/" enctype="multipart/form-data" method="post">
+            <input name="media" type="file" multiple>
+            <input type="submit">
+        </form>
+        <!-- <div class="make-it-a-row"> -->
+        <h3>Camera <a href="/cam">Open in new tab</a></h3>
+        <!-- <a href="/cam">Open in new tab</a> -->
+        <!-- </div> -->
+        <!-- <iframe src="http://localhost:9976/cam" title="Camera" width="100%" height="750px"></iframe> -->
+    </div>
+    <main class="grid-container">
+        <!-- <video id="player" controls autoplay></video> -->
+        <section class="grid-item">
+            <h2>Step 1 - Video feed</h2>
+            <video id="player" autoplay muted playsinline></video>
+            <button id="capture">Capture</button>
+        </section>
+
+        <section class="grid-item">
+
+            <h2>Step 2 - Image from feed</h2>
+            <canvas id="canvas"></canvas>
+            <button class="transparent">View</button>
+        </section>
+
+        <section class="grid-item">
+            <h2>Step 3 - Analyzed image</h2>
+            <div id="loading">
+                <!-- <div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div> -->
+                <img id="loading-fg-gif" class="hidden"
+                    src="https://media.tenor.com/UnFx-k_lSckAAAAC/amalie-steiness.gif">
+                <img id="img" src="https://production-media.paperswithcode.com/libraries/dete.png">
+            </div>
+            <!-- <img id="img" src="https://production-media.paperswithcode.com/libraries/dete.png" alt="Loading"> -->
+            <button id="view">View</button>
+        </section>
+    </main>
+    <aside>
+        <section>
+            <h3>Response</h3>
+            <pre id="response">response goes here</pre>
+        </section>
+
+    </aside>
+
+
+    <script>
+        const player = document.getElementById('player');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        const captureButton = document.getElementById('capture');
+        const viewButton = document.getElementById('view')
+        viewButton.disabled = true;
+        var imgTag = document.getElementById('img')
+        var loadingGif = document.getElementById('loading-fg-gif')
+        var responseParagraph = document.getElementById('response');
+        var x = 50
+        var y = 50
+        
+        setSize(480)
+        imgTag.setAttribute("src", "https://media.tenor.com/KEzW7ALwfUAAAAAC/cat-what.gif") 
+        // just loading gif https://media.tenor.com/UnFx-k_lSckAAAAC/amalie-steiness.gif
+
+        const constraints = {
+            video: true,
+        };
+
+        captureButton.addEventListener('click', () => {
+            // Draw the video frame to the canvas.
+            viewButton.disabled = true;
+
+            // imgTag.setAttribute("src", "https://media.tenor.com/KEzW7ALwfUAAAAAC/cat-what.gif") 
+            loadingGif.classList.remove("hidden")
+            setPosForLoading(`${ x }px`, `${ y }%`)
+
+            context.drawImage(player, 0, 0, canvas.width, canvas.height);
+
+            myFile = canvas.toBlob(
+                (blob) => {
+                    const myFile = new File([blob], 'image.png', {
+                        type: blob.type,
+                    });
+                    // console.log(blob);
+                    const formData = new FormData();
+
+                    formData.append("media", myFile);
+
+
+                    const req = new XMLHttpRequest();
+                    req.open("POST", "/v1/analyse/");
+
+                    req.send(formData);
+
+                    req.onload = function () {
+                        viewButton.disabled = false;
+                        imgTag.classList.remove("hidden")
+                        loadingGif.classList.add("hidden")
+
+                        var json_data = JSON.parse(req.response);
+                        console.log(json_data);
+                        console.log(typeof json_data)
+                        console.log(json_data.media)
+                        viewButton.addEventListener('click', () => {
+                            window.open(json_data.media[0].id, '_blank');
+                        })
+                        imgTag.setAttribute("src", json_data.media[0].id)
+                        responseParagraph.textContent = JSON.stringify(json_data, null, 2);
+                    };
+                }, 'image/png', 1);
+
+        });
+
+        // Attach the video stream to the video element and autoplay.
+        navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+            player.srcObject = stream;
+        });
+
+        function setSize(width) {
+            const height = width * 318 / 424
+            canvas.width = width;
+            canvas.height = height;
+            player.width = width;
+            player.height = height;
+            imgTag.width = width;
+            imgTag.height = height;
+        }
+
+
+        function setPosForLoading(x, y) {
+            loadingGif.style.left = x
+            loadingGif.style.bottom = y
+        }
+    </script>
+
+    <!-- <form action="/cam">
+        <input type="submit" value="Select from camera" />
+    </form> -->
+
+
+</body>
+
+</html>

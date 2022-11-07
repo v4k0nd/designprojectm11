@@ -1,5 +1,4 @@
 FROM nvidia/cuda:11.1.1-cudnn8-devel-ubuntu20.04
-# use an older system (18.04) to avoid opencv incompatibility (issue#3524)
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && apt-get install -y \
@@ -25,8 +24,8 @@ RUN pip install --user torch==1.10 torchvision==0.11.1 -f https://download.pytor
 
 RUN pip install --user 'git+https://github.com/facebookresearch/fvcore'
 
-# for serving json via webinterface
-RUN pip install --upgrade --user fastapi pydantic python-multipart uvicorn orjson 
+# install dependencies to start a webserver
+RUN pip install --upgrade --user fastapi pydantic python-multipart uvicorn jinja2
 
 # ridiculous fix (and only one I was able to find) to skip caching our repository
 ADD https://www.google.com /time.now
@@ -47,24 +46,9 @@ RUN pip install --user -e detectron2_repo
 ENV FVCORE_CACHE="/tmp"
 WORKDIR /home/appuser/detectron2_repo
 
+# copy the main.py into docker, to be able to start later
 COPY ./main.py /home/appuser/detectron2_repo/
+COPY ./website_files/ /home/appuser/detectron2_repo/
+
 
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "9976", "--reload"]
-# run detectron2 under user "appuser":
-# wget http://images.cocodataset.org/val2017/000000439715.jpg -O input.jpg
-# python3 demo/demo.py  \
-	#--config-file configs/COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml \
-	#--input input.jpg --output outputs/ \
-	#--opts MODEL.WEIGHTS detectron2://COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x/137849600/model_final_f10217.pkl
-
-
-
-# COPY ./requirements.txt /code/requirements.txt
-
-# RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
-
-# 
-# COPY ./main.py /code/
-
-# 
-# CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
