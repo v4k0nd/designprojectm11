@@ -143,22 +143,54 @@ import numpy as np
 from pathlib import Path
 import pandas as pd
 import streamlit as st
+import jsonToCsv as jtc
+from zipfile import ZipFile
 
-uploaded_file = st.file_uploader("Choose a  CSV file",type=['csv'])
 
-if uploaded_file is not None:
-#read csv
-    df=pd.read_csv(uploaded_file)
-    algorithm_results=[]
-    temp_test=find_algorithm_names(df)
-    columns= st.columns(len(temp_test),gap="medium")
+def calculate():
+    if (json_file is not None) and (zip_file is not None):
+    #read csv
+        df=pd.read_json(json_file)
+        temp_test=find_algorithm_names(df)
+        columns= st.columns(len(temp_test),gap="medium")
+        for i in range(0, len(temp_test)):
+            show_results(temp_test[i],columns[i])
+
+def get_dataset_names():
+    return []
+
+def load_results(dataset_name):
+    return
+
+
+def read_csv(json):
+    csv_file = jtc.jsonToCsv(json)
+    df = pd.read_csv(csv_file)
+    algorithm_results = []
+    temp_test = find_algorithm_names(df)
+    columns = st.columns(len(temp_test), gap="medium")
     for i in range(0, len(temp_test)):
-        algorithm_results.append(show_results(temp_test[i],columns[i]))
-    result=st.button("View history of runs")
+        algorithm_results.append(show_results(temp_test[i], columns[i]))
+    result = st.button("View history of runs")
     if result:
-    	st=st.empty()
-    	st.write(algorithm_results[0])
-    
+        st = st.empty()
+        st.write(algorithm_results[0])
+
+
+st.title(body="AI evaluation framework")
+
+st.header(body="Upload dataset")
+zip_file = st.file_uploader(label="Choose a zip file containing a data set and a csv file containing the image labels.", type=['zip'])
+
+st.header(body="See stored results")
+dataset_name = st.selectbox(label="Select dataset", options=get_dataset_names())
+st.button(label='Load results', help='Loads results of other algorithms previously ran on the selected dataset', on_click=load_results(dataset_name))
+
+if zip_file is not None:
+    zip_file.extractall(f"..//datasets//{zip_file.name}")
+
+
+
 
 
 # In[ ]:
