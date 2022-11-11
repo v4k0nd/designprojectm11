@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.arise-biodiversity.nl/dsi/v0/dsi_algorithm_predictions.schema.json",
+  "title": "DSI algorithm predictions",
+  "description": "A format for the ouput of DSI (digital species ID) systems which take one or more media files as input and return predictions about species/taxa and other attributes.",
+  "type": "object",
+  
+  "properties": {
+    "generated_by": {
+      "description": "Attributes of the system/process that performed the ID predictions. Fields are optional. Giving datetime is strongly recommended.",
+      "type": "object",
+      "properties": {
+        "datetime": {
+          "description": "Timestamp of when the prediction was generated. Not necessarily the same as the timestamp of when the predictions were sent back to the user. TODO *********** connect to dwc term",
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": { "type": "string" },
+        "tag": { "type": "string" }
+      }
+    },
+    "media": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "description": "Represents a media file (e.g. an image or sound file)",
+        "properties": {
+          "id": { "type": "string" },
+          "filename": { "type": "string" }
+        },
+        "required": ["id", "filename"]
+      }
+    },
+    "region_groups": {
+      "@comment": "The Camtrap-DP concept of a SEQUENCE/MEDIAGROUP is related to our 'region_group'.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "description": "This can flexibly refer to a single file OR a set/sequence of files OR a set/sequence of regions within files (region of interest). Each of the items in here is expected to be referenced in the subsequent section by one or more entries in the 'predictions'. A single item within a region_group is intended to be equivalent to an ROI (region of interest) in Audubon Core.",
+        "properties": {
+          "id": { "type": "string" },
+          "individual_id": { "type": "string" },
+          "regions": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "description": "A single ROI (can also be a whole image, or whole audio clip, simply by referencing the file with no bbox)",
+              "properties": {
+                "media_id": { "type": "string" },
+                "box": {
+                  "type": "object",
+                  "@comment": "All fields optional, but typically for image regions we'd have all of x1,x2,y1,y2 and for audio regions we'd have t1,t2. Other combinations are permitted.",
+                  "properties": {
+                    "x1": { "type": "number" },
+                    "x2": { "type": "number" },
+                    "y1": { "type": "number" },
+                    "y2": { "type": "number" },
+                    "z1": { "type": "number" },
+                    "z2": { "type": "number" },
+                    "t1": { "type": "number" },
+                    "t2": { "type": "number" }
+                  }
+                }
+              },
+              "required": ["media_id"]
+            }
+          }
+        },
+        "required": ["id"]
+      }
+    },
+    "predictions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "region_group_id": { "type": "string" },
+          "taxa": {
+            "type": "object",
+            "@comment": "JSON Schema comment -- you might get confused here, because 'items' and 'type' are both terms used in the JSON Schema syntax, but they're ALSO keys (properties) that we're defining to be used in our output! Beware!",
+            "properties": {
+               "type": { "type": "string"},
+               "items": {
+                 "type": "array",
+                 "items": {
+                   "type": "object",
+                   "@comment": "TDWG mappings: scientific_name == dwc:scientificName, scientific_name_id == dwc:scientificNameID",
+                   "properties": {
+                     "probability": { "type": "number", "minimum": 0, "maximum": 1 },
+                     "scientific_name":    { "type": "string" },
+                     "scientific_name_id": { "type": "string" },
+                     "taxon_id":           { "type": "string" }
+                   }
+                 }
+               }
+            }
+          },
+          "biomass": {
+            "type": "object",
+            "properties": {
+               "value": {"type": "number"},
+               "unit": {"type": "string"}
+            }
+          },
+          "body_length": {
+            "type": "object",
+            "properties": {
+               "value": {"type": "number"},
+               "unit": {"type": "string"}
+            }
+          }
+        },
+        "required": ["region_group_id"]
+      }
+    }
+  },
+  "required": [
+    "generated_by",
+    "media",
+    "region_groups",
+    "predictions"
+  ]
+}
+

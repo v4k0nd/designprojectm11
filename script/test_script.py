@@ -5,7 +5,7 @@ from jsonschema.exceptions import ValidationError
 
 from test_api import *
 
-SCHEMA_PATH = "/mnt/c/Users/chris/Documents/University/design project/data/schemas-main/schema_dsi_algorithm_predictions - Modified.json"
+SCHEMA_PATH = "../json/schema_dsi_algorithm_predictions - Modified.json"
 
 
 def load_schema():
@@ -16,30 +16,38 @@ def load_schema():
 def test_json_multiple_images():
     json_schema = load_schema()
     try:
-        validate(api_testing("dataset-1-5"), json_schema)
+        validate(api_testing("testing datasets/dataset-1-5"), json_schema)
         assert True is True
     except ValidationError:
-        assert False is False
+        assert False is True
 
 
 
 def test_json_single_image():
     json_schema = load_schema()
     try:
-        validate(api_testing("dataset-1"), json_schema)
+        validate(api_testing("testing datasets/dataset-1"), json_schema)
         assert True is True
     except ValidationError:
-        assert False is False
+        assert False is True
 
 
 
 def test_json_blank_image():
     json_schema = load_schema()
     try:
-        validate(api_testing("dataset-blank"), json_schema)
+        validate(api_testing("testing datasets/dataset-blank"), json_schema)
         assert True is True
     except ValidationError:
-        assert False is False
+        assert False is True
+
+def test_json_no_image():
+    json_schema = load_schema()
+    try:
+        validate(api_testing("testing datasets/dataset-empty"), json_schema)
+        assert True is True
+    except ValidationError:
+        assert False is True
 
 
 
