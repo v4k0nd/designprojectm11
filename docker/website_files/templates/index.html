@@ -7,6 +7,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main</title>
     <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
+    <!-- CSS only -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+    <!-- JavaScript Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa"
+        crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -19,17 +26,30 @@
     <div class="indent">
         <h1>Detectron2 analysis lab</h1>
 
+        From where would you like to get the image from?
+        <!-- <p>from where would you like to me to get the image from?</p> -->
 
+        <div style="width: 25%;">
+            <h3>From device files</h3>
+            <form action="/v1/analyse/" enctype="multipart/form-data" method="post">
+                <div class="input-group mb-3">
+                    <input name="media" type="file" multiple class="form-control">
+                    <div class="input-group-append">
+                        <input type="submit" class="btn btn-secondary">
+                    </div>
+                </div>
+            </form>
+        </div>
 
-        <p>from where would you like to me to get the image from?</p>
-
-        <h3>From device files</h3>
-        <form action="/v1/analyse/" enctype="multipart/form-data" method="post">
-            <input name="media" type="file" multiple>
-            <input type="submit">
-        </form>
         <!-- <div class="make-it-a-row"> -->
         <h3>Camera <a href="/cam">Open in new tab</a></h3>
+        <div class="controls">
+            <button id="camera-button">Get camera</button>
+            <select id="camera-select">
+                <option></option>
+                <option value="9m491SdE9t3qYty48NGA5/J48BtgYHYU1pxTzX4iH6s=">Camera 1</option>
+            </select>
+        </div>
         <!-- <a href="/cam">Open in new tab</a> -->
         <!-- </div> -->
         <!-- <iframe src="http://localhost:9976/cam" title="Camera" width="100%" height="750px"></iframe> -->
@@ -37,28 +57,28 @@
     <main class="grid-container">
         <!-- <video id="player" controls autoplay></video> -->
         <section class="grid-item">
-            <h2>Step 1 - Video feed</h2>
+            <h2>Video feed</h2>
             <video id="player" autoplay muted playsinline></video>
-            <button id="capture">Capture</button>
+            <button id="capture" type="button" class="btn btn-primary" onclick="this.disabled = true">Capture</button>
         </section>
 
         <section class="grid-item">
 
-            <h2>Step 2 - Image from feed</h2>
+            <h2>Image from feed</h2>
             <canvas id="canvas"></canvas>
-            <button class="transparent">View</button>
+            <button class="transparent" type="button" class="btn btn-secondary"">View</button>
         </section>
 
-        <section class="grid-item">
-            <h2>Step 3 - Analyzed image</h2>
-            <div id="loading">
-                <!-- <div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div> -->
-                <img id="loading-fg-gif" class="hidden"
-                    src="https://media.tenor.com/UnFx-k_lSckAAAAC/amalie-steiness.gif">
-                <img id="img" src="https://production-media.paperswithcode.com/libraries/dete.png">
-            </div>
-            <!-- <img id="img" src="https://production-media.paperswithcode.com/libraries/dete.png" alt="Loading"> -->
-            <button id="view">View</button>
+        <section class=" grid-item">
+                <h2>Analyzed image</h2>
+                <div id="loading">
+                    <!-- <div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div> -->
+                    <img id="loading-fg-gif" class="hidden"
+                        src="https://media.tenor.com/UnFx-k_lSckAAAAC/amalie-steiness.gif">
+                    <img id="img" src="https://production-media.paperswithcode.com/libraries/dete.png">
+                </div>
+                <!-- <img id="img" src="https://production-media.paperswithcode.com/libraries/dete.png" alt="Loading"> -->
+                <button id="view" class="btn btn-primary">View</button>
         </section>
     </main>
     <aside>
@@ -71,7 +91,11 @@
 
 
     <script>
+        const cameraButton = document.getElementById('camera-button');
+        const cameraSelect = document.getElementById('camera-select');
+
         const player = document.getElementById('player');
+        let currentStream;
         const canvas = document.getElementById('canvas');
         const context = canvas.getContext('2d');
         const captureButton = document.getElementById('capture');
@@ -80,24 +104,20 @@
         var imgTag = document.getElementById('img')
         var loadingGif = document.getElementById('loading-fg-gif')
         var responseParagraph = document.getElementById('response');
-        var x = 50
-        var y = 50
-        
-        setSize(480)
-        imgTag.setAttribute("src", "https://media.tenor.com/KEzW7ALwfUAAAAAC/cat-what.gif") 
+        var size = 480
+
+        setSize(size)
+        imgTag.setAttribute("src", "https://media.tenor.com/KEzW7ALwfUAAAAAC/cat-what.gif")
         // just loading gif https://media.tenor.com/UnFx-k_lSckAAAAC/amalie-steiness.gif
 
-        const constraints = {
-            video: true,
-        };
+        // context.font = "30px SFMono-Regular";
+        // context.fillText("Click \"Capture\"", x, y)
 
         captureButton.addEventListener('click', () => {
             // Draw the video frame to the canvas.
             viewButton.disabled = true;
 
-            // imgTag.setAttribute("src", "https://media.tenor.com/KEzW7ALwfUAAAAAC/cat-what.gif") 
             loadingGif.classList.remove("hidden")
-            setPosForLoading(`${ x }px`, `${ y }%`)
 
             context.drawImage(player, 0, 0, canvas.width, canvas.height);
 
@@ -106,7 +126,6 @@
                     const myFile = new File([blob], 'image.png', {
                         type: blob.type,
                     });
-                    // console.log(blob);
                     const formData = new FormData();
 
                     formData.append("media", myFile);
@@ -119,6 +138,7 @@
 
                     req.onload = function () {
                         viewButton.disabled = false;
+                        captureButton.disabled = false;
                         imgTag.classList.remove("hidden")
                         loadingGif.classList.add("hidden")
 
@@ -136,10 +156,77 @@
 
         });
 
+        cameraButton.addEventListener('click', event => {
+            /*
+            const constraints = {
+                video: true
+                // audio: false
+            };
+            navigator.mediaDevices
+                .getUserMedia(constraints).then(stream => {
+                    player.srcObject = stream;
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+          */
+            if (typeof currentStream !== 'undefined') {
+                stopMediaTracks(currentStream);
+            }
+            const videoConstraints = {};
+            if (cameraSelect.value === '') {
+                videoConstraints.facingMode = 'environment';
+            } else {
+                videoConstraints.deviceId = { exact: cameraSelect.value };
+            }
+            const constraints = {
+                video: videoConstraints
+                // audio: false
+            };
+            navigator.mediaDevices
+                .getUserMedia(constraints)
+                .then(stream => {
+                    currentStream = stream;
+                    player.srcObject = stream;
+                    return navigator.mediaDevices.enumerateDevices();
+                })
+                .then(gotDevices)
+                .catch(error => {
+                    console.error(error);
+                });
+        });
+
+        function gotDevices(mediaDevices) {
+            cameraSelect.innerHTML = '';
+            cameraSelect.appendChild(document.createElement('option'));
+            let count = 1;
+            mediaDevices.forEach(mediaDevice => {
+                if (mediaDevice.kind === 'videoinput') {
+                    const option = document.createElement('option');
+                    option.value = mediaDevice.deviceId;
+                    const label = mediaDevice.label || `Camera ${count++}`;
+                    const textNode = document.createTextNode(label);
+                    option.appendChild(textNode);
+                    cameraSelect.appendChild(option);
+                }
+            });
+        }
+        navigator.mediaDevices.enumerateDevices().then(gotDevices);
+        function stopMediaTracks(stream) {
+            stream.getTracks().forEach(track => {
+                track.stop();
+            });
+        }
+        /*
+        const constraints = {
+            video: true,
+        };
+
         // Attach the video stream to the video element and autoplay.
         navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
             player.srcObject = stream;
         });
+        */
 
         function setSize(width) {
             const height = width * 318 / 424
@@ -150,19 +237,7 @@
             imgTag.width = width;
             imgTag.height = height;
         }
-
-
-        function setPosForLoading(x, y) {
-            loadingGif.style.left = x
-            loadingGif.style.bottom = y
-        }
     </script>
-
-    <!-- <form action="/cam">
-        <input type="submit" value="Select from camera" />
-    </form> -->
-
-
 </body>
 
 </html>
