@@ -31,7 +31,7 @@ RUN pip install --upgrade --user fastapi pydantic python-multipart uvicorn jinja
 ADD https://www.google.com /time.now
  
 # install detectron2
-RUN git clone https://github.com/facebookresearch/detectron2 detectron2_repo
+RUN git clone https://github.com/v4k0nd/designprojectm11.git detectron2_repo
 # set FORCE_CUDA because during `docker build` cuda is not accessible
 ENV FORCE_CUDA="1"
 # This will by default build detectron2 for all common cuda architectures and take a lot more time,

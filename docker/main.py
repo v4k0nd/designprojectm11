@@ -78,6 +78,9 @@ async def create_upload_files(
         if data_json_location.exists():
             with open(data_json_location) as f:
                 return json.load(f)
+        else:
+            raise HTTPException(status_code=500, detail=f"did not find {data_json_location}")
+            
 
 
 @app.get("/", response_class=HTMLResponse)
