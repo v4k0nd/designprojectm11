@@ -37,6 +37,15 @@ def get_image(
 ):
     return FileResponse(f"./outputs/tmp/{file_path}")
 
+@app.post("/live-cam")
+async def stream_camera(
+    
+):
+    try:
+        p = subprocess.run(["python3", "demo/demo.py", "--webcam"])
+            # p = subprocess.run(f"python3 demo/demo.py --input {inputs} --output {out_tmp}", shell=True)
+    except FileNotFoundError as fnfe:
+            raise HTTPException(status_code=500, detail=f"While running the algorithm, an error occured: {fnfe.strerror}")
 
 @app.post("/v1/analyse/")
 async def create_upload_files(
