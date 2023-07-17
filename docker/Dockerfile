@@ -2,7 +2,7 @@ FROM nvidia/cuda:11.1.1-cudnn8-devel-ubuntu20.04
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && apt-get install -y \
-	python3-opencv ca-certificates python3-dev git wget sudo ninja-build 
+	python3-opencv ca-certificates python3-dev git wget sudo ninja-build
 RUN ln -sv /usr/bin/python3 /usr/bin/python
 
 # create a non-root user
@@ -31,8 +31,7 @@ RUN pip install --upgrade --user fastapi pydantic python-multipart uvicorn jinja
 ADD https://www.google.com /time.now
  
 # install detectron2
-RUN git clone https://github.com/v4k0nd/designprojectm11.git detectron2_repo
-
+RUN git clone https://github.com/facebookresearch/detectron2 detectron2_repo
 # set FORCE_CUDA because during `docker build` cuda is not accessible
 ENV FORCE_CUDA="1"
 # This will by default build detectron2 for all common cuda architectures and take a lot more time,
@@ -52,3 +51,10 @@ COPY ./website_files/ /home/appuser/detectron2_repo/
 
 
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "9976", "--reload"]
+
+# run detectron2 under user "appuser":
+# wget http://images.cocodataset.org/val2017/000000439715.jpg -O input.jpg
+# python3 demo/demo.py  \
+	#--config-file configs/COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml \
+	#--input input.jpg --output outputs/ \
+	#--opts MODEL.WEIGHTS detectron2://COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x/137849600/model_final_f10217.pkl

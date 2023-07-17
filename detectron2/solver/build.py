@@ -13,8 +13,9 @@ from fvcore.common.param_scheduler import (
 )
 
 from detectron2.config import CfgNode
+from detectron2.utils.env import TORCH_VERSION
 
-from .lr_scheduler import LRMultiplier, WarmupParamScheduler
+from .lr_scheduler import LRMultiplier, LRScheduler, WarmupParamScheduler
 
 _GradientClipperInput = Union[torch.Tensor, Iterable[torch.Tensor]]
 _GradientClipper = Callable[[_GradientClipperInput], None]
@@ -126,13 +127,16 @@ def build_optimizer(cfg: CfgNode, model: torch.nn.Module) -> torch.optim.Optimiz
         bias_lr_factor=cfg.SOLVER.BIAS_LR_FACTOR,
         weight_decay_bias=cfg.SOLVER.WEIGHT_DECAY_BIAS,
     )
-    return maybe_add_gradient_clipping(cfg, torch.optim.SGD)(
-        params,
-        lr=cfg.SOLVER.BASE_LR,
-        momentum=cfg.SOLVER.MOMENTUM,
-        nesterov=cfg.SOLVER.NESTEROV,
-        weight_decay=cfg.SOLVER.WEIGHT_DECAY,
-    )
+    sgd_args = {
+        "params": params,
+        "lr": cfg.SOLVER.BASE_LR,
+        "momentum": cfg.SOLVER.MOMENTUM,
+        "nesterov": cfg.SOLVER.NESTEROV,
+        "weight_decay": cfg.SOLVER.WEIGHT_DECAY,
+    }
+    if TORCH_VERSION >= (1, 12):
+        sgd_args["foreach"] = True
+    return maybe_add_gradient_clipping(cfg, torch.optim.SGD(**sgd_args))
 
 
 def get_default_optimizer_params(
@@ -237,9 +241,13 @@ def _expand_param_groups(params: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     ret = defaultdict(dict)
     for item in params:
         assert "params" in item
-        cur_params = {x: y for x, y in item.items() if x != "params"}
-        for param in item["params"]:
-            ret[param].update({"params": [param], **cur_params})
+        cur_params = {x: y for x, y in item.items() if x != "params" and x != "param_names"}
+        if "param_names" in item:
+            for param_name, param in zip(item["param_names"], item["params"]):
+                ret[param].update({"param_names": [param_name], "params": [param], **cur_params})
+        else:
+            for param in item["params"]:
+                ret[param].update({"params": [param], **cur_params})
     return list(ret.values())
 
 
@@ -253,19 +261,26 @@ def reduce_param_groups(params: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     params = _expand_param_groups(params)
     groups = defaultdict(list)  # re-group all parameter groups by their hyperparams
     for item in params:
-        cur_params = tuple((x, y) for x, y in item.items() if x != "params")
-        groups[cur_params].extend(item["params"])
+        cur_params = tuple((x, y) for x, y in item.items() if x != "params" and x != "param_names")
+        groups[cur_params].append({"params": item["params"]})
+        if "param_names" in item:
+            groups[cur_params][-1]["param_names"] = item["param_names"]
+
     ret = []
     for param_keys, param_values in groups.items():
         cur = {kv[0]: kv[1] for kv in param_keys}
-        cur["params"] = param_values
+        cur["params"] = list(
+            itertools.chain.from_iterable([params["params"] for params in param_values])
+        )
+        if len(param_values) > 0 and "param_names" in param_values[0]:
+            cur["param_names"] = list(
+                itertools.chain.from_iterable([params["param_names"] for params in param_values])
+            )
         ret.append(cur)
     return ret
 
 
-def build_lr_scheduler(
-    cfg: CfgNode, optimizer: torch.optim.Optimizer
-) -> torch.optim.lr_scheduler._LRScheduler:
+def build_lr_scheduler(cfg: CfgNode, optimizer: torch.optim.Optimizer) -> LRScheduler:
     """
     Build a LR scheduler from config.
     """

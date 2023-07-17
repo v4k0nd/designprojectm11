@@ -125,7 +125,7 @@ if __name__ == "__main__":
         for path in tqdm.tqdm(args.input, disable=not args.output):
             # use PIL, to be consistent with evaluation
             img = read_image(path, format="BGR")
-            
+
 
 
             start_time = time.time()
@@ -169,8 +169,10 @@ if __name__ == "__main__":
             )
 
             if args.output:
+                print(f"checking if output is there {args.output}")
                 if os.path.isdir(args.output):
                     assert os.path.isdir(args.output), args.output
+                    print(f"found and it is a directory")
                     out_filename = os.path.join(args.output, os.path.basename(path))
                     # write to csv
                     if f_csv is None:
@@ -184,6 +186,7 @@ if __name__ == "__main__":
                     
                     
                 else:
+                    print("did not find")
                     assert len(args.input) == 1, "Please specify a directory with args.output"
                     out_filename = args.output
                 visualized_output.save(out_filename)
@@ -192,7 +195,7 @@ if __name__ == "__main__":
                 cv2.imshow(WINDOW_NAME, visualized_output.get_image()[:, :, ::-1])
                 if cv2.waitKey(0) == 27:
                     break  # esc to quit
-    
+
         # write to json (API)
         # if f_json is None:
         json_dir = os.path.join(args.output, "data.json")
