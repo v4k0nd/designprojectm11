@@ -2,6 +2,8 @@ import json
 import shutil
 import tempfile
 from typing import List
+import os
+from PIL import Image
 
 from fastapi import FastAPI, File, UploadFile, HTTPException, Request
 from fastapi.responses import HTMLResponse, FileResponse
@@ -61,6 +63,18 @@ async def create_upload_files(
                 shutil.copyfileobj(file.file, file_object) 
             inputs.append(file_location)
 
+        # Debugging
+        print("File:", file_location) # print the name of the file
+        print("out_tmp:", out_tmp) # print the name of the file
+        print("Exists:", os.path.exists(file_location)) # check if the file exists
+        print("Is file:", os.path.isfile(file_location)) # check if it's a file (not a directory)
+
+        try:
+            img = Image.open(file_location) # try opening the image
+            img.verify() # verify that it is, in fact an image
+        except (IOError, SyntaxError) as e:
+            print('Bad file:', file_location) # print out the names of bad files
+        
         Path(out_tmp).mkdir(parents=True, exist_ok=True)
         
         try:

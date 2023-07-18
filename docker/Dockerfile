@@ -25,7 +25,7 @@ RUN pip install --user torch==1.10 torchvision==0.11.1 -f https://download.pytor
 RUN pip install --user 'git+https://github.com/facebookresearch/fvcore'
 
 # install dependencies to start a webserver
-RUN pip install --upgrade --user fastapi pydantic python-multipart uvicorn jinja2
+RUN pip install --upgrade --user fastapi pydantic python-multipart uvicorn jinja2 Pillow
 
 # ridiculous fix (and only one I was able to find) to skip caching our repository
 ADD https://www.google.com /time.now
