@@ -2,7 +2,7 @@ FROM nvidia/cuda:11.1.1-cudnn8-devel-ubuntu20.04
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && apt-get install -y \
-	python3-opencv ca-certificates python3-dev git wget sudo ninja-build
+	python3-opencv ca-certificates python3-dev git wget sudo ninja-build nvidia-smi nvidia-cuda-toolkit
 RUN ln -sv /usr/bin/python3 /usr/bin/python
 
 # create a non-root user
@@ -24,8 +24,8 @@ RUN pip install --user torch==1.10 torchvision==0.11.1 -f https://download.pytor
 
 RUN pip install --user 'git+https://github.com/facebookresearch/fvcore'
 
-# install dependencies to start a webserver
-RUN pip install --upgrade --user fastapi pydantic python-multipart uvicorn jinja2 Pillow
+# install dependencies to start a webserver and view gpus
+RUN pip install --upgrade --user fastapi pydantic python-multipart uvicorn jinja2 Pillow gpustat
 
 # ridiculous fix (and only one I was able to find) to skip caching our repository
 ADD https://www.google.com /time.now
@@ -47,10 +47,13 @@ WORKDIR /home/appuser/detectron2_repo
 
 # copy the main.py into docker, to be able to start later
 COPY ./main.py /home/appuser/detectron2_repo/
+COPY ./start.sh /home/appuser/detectron2_repo/
 COPY ./website_files/ /home/appuser/detectron2_repo/
 
-
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "9976", "--reload"]
+# Make your start script executable
+RUN chmod +x ./start.sh
+CMD ["./start.sh"]
+# CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "9976", "--reload"]
 
 # run detectron2 under user "appuser":
 # wget http://images.cocodataset.org/val2017/000000439715.jpg -O input.jpg

@@ -4,15 +4,12 @@ import tempfile
 from typing import List
 import os
 from PIL import Image
+import gpustat
 
 from fastapi import FastAPI, File, UploadFile, HTTPException, Request
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-
-
-
-
 
 from pathlib import Path
 import subprocess
@@ -28,6 +25,9 @@ templates = Jinja2Templates(directory="templates")
 # async def read_item(request: Request, id: str):
 #     return templates.TemplateResponse("item.html", {"request": request, "id": id})
 
+@app.get("/gpus")
+async def list_gpus():
+    return gpustat.new_query().jsonify()
 
 @app.get("/cam", response_class=HTMLResponse)
 def get_camera(request: Request): 
