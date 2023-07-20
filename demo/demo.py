@@ -106,17 +106,18 @@ if __name__ == "__main__":
     # Check if CUDA is available
     if torch.cuda.is_available():
         # Log the current device
+        curr_dev_nr = torch.cuda.current_device()
         logger.info(f"Current device: {torch.cuda.current_device()}")
         
         # Log the number of GPUs
         logger.info(f"Number of GPUs: {torch.cuda.device_count()}")
         
         # Log the name of the current device
-        logger.info(f"Current device name: {torch.cuda.get_device_name(torch.cuda.current_device())}")
+        logger.info(f"Current device name: {torch.cuda.get_device_name(curr_dev_nr)}")
         
         # Log the memory allocation and cache for the current device
-        logger.info(f"Memory allocated: {torch.cuda.memory_allocated()}")
-        logger.info(f"Memory cached: {torch.cuda.memory_cached()}")
+        logger.info(f"Memory allocated: {torch.cuda.memory_allocated(curr_dev_nr)}")
+        logger.info(f"Memory cached: {torch.cuda.memory_cached(curr_dev_nr)}")
     else:
         logger.info("No GPUs detected.")
 
