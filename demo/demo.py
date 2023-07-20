@@ -114,12 +114,10 @@ if __name__ == "__main__":
         logger.info(f"| Number of GPUs: {torch.cuda.device_count()}")
         logger.info(f"| Current device name: {torch.cuda.get_device_name(curr_dev_nr)}")
         logger.info(f"| Total memory on device: {total_memory_gb} GB")
-        
         logger.info(f"| Memory allocated: {torch.cuda.memory_allocated(curr_dev_nr)}")
         logger.info(f"| Memory cached (reserved): {torch.cuda.memory_reserved(curr_dev_nr)}")
-
-        logger.info("===============================")
-        logger.info("\n= detectron's way of gpu info =")
+        logger.info("===============================\n")
+        logger.info("= detectron's way of gpu info =")
         max_reserved_mb = torch.cuda.max_memory_reserved() / 1024.0 / 1024.0
         reserved_mb = torch.cuda.memory_reserved() / 1024.0 / 1024.0
         max_allocated_mb = torch.cuda.max_memory_allocated() / 1024.0 / 1024.0
