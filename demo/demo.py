@@ -105,22 +105,46 @@ if __name__ == "__main__":
     
     # Check if CUDA is available
     if torch.cuda.is_available():
-        logger.info(f"===== GPU info =====")
+        logger.info("=========== GPU info ==========")
         curr_dev_nr = torch.cuda.current_device()
-        logger.info(f"Current device: {torch.cuda.current_device()}")
+        logger.info(f"| Current device: {torch.cuda.current_device()}")
         
-        logger.info(f"Number of GPUs: {torch.cuda.device_count()}")
+        logger.info(f"| Number of GPUs: {torch.cuda.device_count()}")
         
-        logger.info(f"Current device name: {torch.cuda.get_device_name(curr_dev_nr)}")
+        logger.info(f"| Current device name: {torch.cuda.get_device_name(curr_dev_nr)}")
 
         total_memory = torch.cuda.get_device_properties(curr_dev_nr).total_memory
-        logger.info(f"Total memory on device {curr_dev_nr}: {total_memory}")
+        total_memory_gb = total_memory / (1024 ** 3)
+        logger.info(f"| Total memory on device: {total_memory_gb}")
         
-        logger.info(f"Memory allocated: {torch.cuda.memory_allocated(curr_dev_nr)}")
-        logger.info(f"Memory cached (reserved): {torch.cuda.memory_reserved(curr_dev_nr)}")
-        logger.info("====================")
+        logger.info(f"| Memory allocated: {torch.cuda.memory_allocated(curr_dev_nr)}")
+        logger.info(f"| Memory cached (reserved): {torch.cuda.memory_reserved(curr_dev_nr)}")
+
+        logger.info("===============================")
+        logger.info("= detectron's way of gpu info =")
+        max_reserved_mb = torch.cuda.max_memory_reserved() / 1024.0 / 1024.0
+        reserved_mb = torch.cuda.memory_reserved() / 1024.0 / 1024.0
+        max_allocated_mb = torch.cuda.max_memory_allocated() / 1024.0 / 1024.0
+        allocated_mb = torch.cuda.memory_allocated() / 1024.0 / 1024.0
+
+        logger.info(
+            (
+                "| max_reserved_mem: {:.0f}MB "
+                "| reserved_mem: {:.0f}MB "
+                "| max_allocated_mem: {:.0f}MB "
+                "| allocated_mem: {:.0f}MB "
+            ).format(
+                max_reserved_mb,
+                reserved_mb,
+                max_allocated_mb,
+                allocated_mb,
+            )
+        )
+        logger.info("===============================")
     else:
         logger.info("No GPUs detected.")
+        
+
 
     demo = VisualizationDemo(cfg)
     f_csv = None
