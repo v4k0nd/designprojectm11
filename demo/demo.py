@@ -16,6 +16,7 @@ from datetime import datetime
 from detectron2.config import get_cfg
 from detectron2.data.detection_utils import read_image
 from detectron2.utils.logger import setup_logger
+import torch
 
 from predictor import VisualizationDemo
 
@@ -101,6 +102,23 @@ if __name__ == "__main__":
     logger.info("Arguments: " + str(args))
 
     cfg = setup_cfg(args)
+    
+    # Check if CUDA is available
+    if torch.cuda.is_available():
+        # Log the current device
+        logger.info(f"Current device: {torch.cuda.current_device()}")
+        
+        # Log the number of GPUs
+        logger.info(f"Number of GPUs: {torch.cuda.device_count()}")
+        
+        # Log the name of the current device
+        logger.info(f"Current device name: {torch.cuda.get_device_name(torch.cuda.current_device())}")
+        
+        # Log the memory allocation and cache for the current device
+        logger.info(f"Memory allocated: {torch.cuda.memory_allocated()}")
+        logger.info(f"Memory cached: {torch.cuda.memory_cached()}")
+    else:
+        logger.info("No GPUs detected.")
 
     demo = VisualizationDemo(cfg)
     f_csv = None
