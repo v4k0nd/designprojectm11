@@ -18,16 +18,27 @@ git clone https://github.com/v4k0nd/designprojectm11.git
 cd designprojectm11/docker
 ```
 
-3. Build the image (might need to `sudo`)
+3. Build the image (might need to `sudo`), \
+`Dockerfile.folder` for the folder input output version 
 
-```bash
-docker build --build-arg USER_ID=$UID -t detectron2:v0 .
-```
+    ```bash
+    docker build --build-arg USER_ID=$UID -t detectron2:folder-v0 -f Dockerfile.folder .
+    ```
+
+    `Dockerfile.server` for the server API call version
+
+    ```bash
+    docker build --build-arg USER_ID=$UID -t detectron2:server-v0 -f Dockerfile.server .
+    ```
 
 4. Run it (might need to `sudo`)
-
+for the folder version
 ```bash
-docker run -p 9976:9976 --gpus all -it -v /detectron2_detection/:/code/ --name=detectron2_container detectron2:v0
+docker run -p 9976:9976 --gpus all -it -v /detectron2_detection/:/code/ --name=detectron2_container_folder detectron2:folder-v0
+```
+the server version
+```bash
+docker run -p 9976:9976 --gpus all -it -v /detectron2_detection/:/code/ --name=detectron2_container_folder detectron2:server-v0
 ```
 
 5. You should be in the docker container, and FastAPI server should have started
