@@ -51,6 +51,10 @@ COPY ./start.sh /home/appuser/detectron2_repo/
 COPY ./website_files/ /home/appuser/detectron2_repo/
 COPY ./main-folders.py /home/appuser/detectron2_repo/
 
+# create "inputs" and "outputs" directories
+RUN mkdir -p /home/appuser/detectron2_repo/inputs && \
+    mkdir -p /home/appuser/detectron2_repo/outputs
+
 # Make your start script executable
 # RUN chmod +x ./start.sh
 # CMD ["./start.sh"]

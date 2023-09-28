@@ -3,8 +3,8 @@ from PIL import Image
 import subprocess
 import os
 
-INPUT_DIR = Path(os.getenv("INPUT_DIR", "/app/inputs/"))
-OUTPUT_DIR = Path(os.getenv("OUTPUT_DIR", "/app/outputs/"))
+INPUT_DIR = Path(os.getenv("INPUT_DIR", "/home/appuser/detectron2_repo/inputs"))
+OUTPUT_DIR = Path(os.getenv("OUTPUT_DIR", "/home/appuser/detectron2_repo/outputs"))
 
 inputs = []
 for image_path in INPUT_DIR.iterdir():

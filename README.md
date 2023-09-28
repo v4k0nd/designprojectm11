@@ -34,7 +34,13 @@ cd designprojectm11/docker
 4. Run it (might need to `sudo`)
 for the folder version
 ```bash
-docker run -p 9976:9976 --gpus all -it -v /detectron2_detection/:/code/ --name=detectron2_container_folder detectron2:folder-v0
+docker run -p 9976:9976 --gpus all -it \
+    -v /detectron2_detection/:/code/ \
+    -v $(pwd)/inputs:/home/appuser/detectron2_repo/inputs \
+    -v $(pwd)/outputs:/home/appuser/detectron2_repo/outputs \
+    --env INPUT_DIR=/home/appuser/detectron2_repo/inputs \
+    --env OUTPUT_DIR=/home/appuser/detectron2_repo/outputs \
+    --name=detectron2_container_folder detectron2:folder-v0
 ```
 the server version
 ```bash
